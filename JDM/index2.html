@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!--Import Google Icon Font-->
+        <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <!--Import materialize.css-->
+        <link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/>
+        <link type="text/css" rel="stylesheet" href="css/mycss.css"  media="screen,projection"/>
+
+        <!--Let browser know website is optimized for mobile-->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    </head>
+
+    <body>
+        <!--Import jQuery before materialize.js-->
+        <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+        <script type="text/javascript" src="js/materialize.min.js"></script>
+        <script type="text/javascript" src="accordion2.js"></script>
+        <script>
+            function test() {
+                cleanPage();
+                $("#searchDiv").append("<div class='progress'><div class='indeterminate'></div></div>");
+                var text= document.getElementById("search").value;
+                if((text.match(/'/g) || []).length == 1){
+                    if((text.match(/\\/g) || []).length == 1)
+                        text=text.replace(/\\/g,"\\\\");
+                    else
+                        text=text.replace(/'/g,"\\\\'");
+                }
+                text=text.replace(">","&gt;");
+               
+                console.log(text);
+                search=text;
+                e=document.getElementById('list');
+                if(e!=null)
+                    e.parentElement.removeChild(e);
+
+                var values=$("#assocs").val();
+                var i=0;
+                values.forEach(function(listItem, index){
+                    var query="/search2.php?mot="+text;
+                    var xmlHttp = new XMLHttpRequest();
+                    xmlHttp.onreadystatechange = function() { 
+                        if (xmlHttp.readyState == 4 && xmlHttp.status == 200){
+                            var resp;
+                            try {
+                                resp = JSON.parse(xmlHttp.response);
+                            } catch(e) {
+                                $(".progress").remove();
+                                Materialize.toast('Pas de resultats', 4000)
+                                return;
+                            }
+                            //console.log(resp);
+                            $(".progress").remove();
+                            generatePage(resp,listItem);
+                        }
+                    }
+                    // console.log("foreach "+listItem);
+                    generateAccordion(listItem,$("#o"+listItem).text());
+                    query+="&offset=0&rel=";
+                    query+=listItem;
+                    xmlHttp.open("GET", query, true); // true for asynchronous 
+                    xmlHttp.send(null);			
+                });
+                getDefinition(text);
+
+            }
+        </script>
+        <nav>
+            <div class="nav-wrapper">
+                <a href="#" class="brand-logo right">Diko JDM!</a>
+                <ul id="nav-mobile" class="left hide-on-med-and-down">
+                    <li><a href="index.html">Acceuil</a></li>
+                    <li><a href="http://www.reddit.com">Components</a></li>
+                    <li><a href="http://www.jeuxdemots.org">JeuxDeMots.org</a></li>
+                </ul>
+            </div>
+        </nav>
+        <div class="row">
+            <div class="col s12 m10 l8 offset-m1 offset-l2">
+                <h1 id="rdico" class="center-align">Rechercher dans le Diko</h1>
+            </div>
+            <form class="col s12" method="get" action="javascript:test();">
+                <div class="row">
+                    <div class="input-field col s10 m6 offset-s1 offset-m3">
+                        <input id="search" type="text" spellcheck="false" autocorrect="off" autocomplete="off" class="autocomplete">
+                        <label for="search">Entrez votre terme</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s10 m6 offset-s1 offset-m3">
+                        <select multiple id="assocs">
+                            <option value="-1" disabled>Relations a afficher</option>
+                            <option id="o0" value="0" selected>Association d'idées</option>
+                            <option id="o1" value="1">Raffinement sémantique</option>
+                            <option id="o3" value="3">Domaine</option>
+                            <option id="o5" value="5">Synonymes</option>
+                            <option id="o7" value="7">Antonymes</option>
+                            <option id="o10" value="10">Holonymes</option>
+                            <option id="o11" value="11">Locution</option>
+                            <option id="o13" value="13">Agent de l'action</option>
+                            <option id="o15" value="15">Lieux associés</option>
+
+
+                        </select>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="center-align col s10 m4 offset-s1 offset-m4" id='searchDiv'>
+            <a onclick="test()" class="waves-effect waves-light btn"><i class="material-icons right">search</i>Rechercher</a>
+        </div>
+        <div id="result_panel" class="row" style="display: none;">
+            <div class="col s12 m10 offset-m1  z-depth-3">
+                <h1 id="title"></h1>
+                <div class="divider"></div>
+                <p id="def"></p>
+                <a id="button" class="waves-effect waves-light btn" onclick="expandAll()">Afficher/Masquer tout</a>
+                <ul id="col" class="collapsible" data-collapsible="expandable">
+                </ul>
+            </div>
+        </div>
+        <div id="modal1" class="modal modal-fixed-footer">
+            <div class="modal-content">
+                <h4>Modal Header</h4>
+                <p>A bunch of text</p>
+            </div>
+            <div class="modal-footer">
+                <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat ">Close</a>
+                <a href="#!" id="modalnext-2" class="modal-action waves-effect waves-green btn-flat">Next</a>
+                <a href="#!" id="modalprev-2" class="disabled modal-action waves-effect waves-green btn-flat">Prev</a>
+            </div>
+        </div>
+    </body>
+</html>

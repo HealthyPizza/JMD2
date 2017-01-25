@@ -1,0 +1,12 @@
+
+
+#b1 {
+    background-color: white;
+}
+
+.fake-link {
+    color: blue-text;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
